@@ -1,0 +1,7 @@
+./mybackup_1033311 -[digit]: Backup the current directory every digit's minutes to /home/$USER/backup.
+
+./mybackup_1033311 -d [path]: Setting the backup path to given path.
+
+./mybackup_1033311 -q: Terminate the current backup schedule.
+
+./mybackup_1033311 -h: Show the README content.

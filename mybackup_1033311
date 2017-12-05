@@ -1,0 +1,47 @@
+#!/bin/bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+#schedule function
+function schedule(){
+    echo "*/${OPT} * * * * tar zcf ${backupDir}/${currentDir}_\$(date +\%Y_\%m\%d_\%H\%M).tgz -C ${PWD} ."
+}
+#get the option
+OPT=$(echo $1| cut -d'-' -f 2)
+#get the current directory
+currentDir=${PWD##*/}
+backupDir="/home/$USER/backup"
+if [ "${OPT}" == "d" ];then # if option is d, memorize the given path
+    backupDir=${2}
+    echo "Change backup directory to ${backupDir}"
+    echo "${backupDir}" > /home/$USER/bin/backupPath
+fi
+#start to make optional operation
+if [[ ${OPT} =~ [[:digit:]] ]] # if option is digit, make schedule
+then
+    if [ -f /home/$USER/bin/backupPath ];then
+        backupDir=$(cat backupPath)
+    fi
+    #check the existance of directory
+    if [ ! -d ${backupDir} ];then
+	#if not, make it
+        mkdir ${backupDir}
+    fi
+    #start crontab 
+    (crontab -l ; schedule) | crontab -
+elif [ "${OPT}" == "q" ] # else if option is q, remove the schedule
+then
+    crontab -r
+elif [ "${OPT}" == "h" ] # else if option is h, show the README
+then
+    cat /home/$USER/bin/README
+elif [ "${OPT}" == "a" ] # else if option is a, edit the schedule list
+then
+    vim /home/$USER/bin/scheduleList
+    # Find the given row line number
+    lino=($(awk '/###/{ print NR; }' /home/$USER/bin/scheduleList))
+    lastLine=$((${lino[1]} + 1))
+    rows=($(awk "FNR>=$lastLine{print}" /home/$USER/bin/scheduleList))
+    for i in "${rows[@]}"
+    do
+        echo $i
+    done   
+fi
